@@ -105,8 +105,8 @@ class FeedCache {
                                        completion: @escaping (Result<[FeedItem], Error>) -> Void) {
         switch result {
         case .empty:
-            removeStoreData {
-                completion(.success([]))
+            removeStoreData { [unowned self] in
+                self.loadFromLoader(completion: completion)
             }
         case .result(let feedStoreDataRepresentation):
             handleCachedFeed(cache: feedStoreDataRepresentation,
@@ -119,8 +119,8 @@ class FeedCache {
         if isCacheValid(cache: cache) {
             completion(.success(cache.feed))
         } else {
-            removeStoreData {
-                completion(.success([]))
+            removeStoreData { [unowned self] in
+                self.loadFromLoader(completion: completion)
             }
         }
     }
@@ -156,27 +156,27 @@ class FeedCacheTests: XCTestCase {
         }
         let (_, spy) = makeSUT()
         XCTAssertEqual(networkCallCount, 0, "expected 0 network calls, got \(networkCallCount) instead.")
-        XCTAssertTrue(spy.messages.isEmpty, "expected no messages to feed store, got \(spy.messages) instead.")
+        expect(spy, toRecieve: [])
     }
     
     func test_load_requestsLoadFromLocalStorage() {
         let (sut, spy) = makeSUT()
         sut.load() { _ in }
-        XCTAssertEqual(spy.messages, [.load], "expected load message to feed store, got \(spy.messages) instead.")
+        expect(spy, toRecieve: [.load])
     }
     
     func test_load_requestsDeleteOnLoadError() {
         let (sut, spy) = makeSUT()
         sut.load() { _ in }
         spy.completeLoad(withResult: .failure(anyNSError()))
-        XCTAssertEqual(spy.messages, [.load, .delete], "expected load and delete message to feed store, got \(spy.messages) instead.")
+        expect(spy, toRecieve: [.load, .delete])
     }
     
     func test_load_requestsDeleteOnEmptyResultFromStore() {
         let (sut, spy) = makeSUT()
         sut.load() { _ in }
         spy.completeLoad(withResult: .success(.empty))
-        XCTAssertEqual(spy.messages, [.load, .delete], "expected load and delete message to feed store, got \(spy.messages) instead.")
+        expect(spy, toRecieve: [.load, .delete])
     }
     
     func test_load_requestsDeleteOnExpiredCache() {
@@ -189,23 +189,79 @@ class FeedCacheTests: XCTestCase {
             .addingTimeInterval(-1)
         let data = FeedStoreDataRepresentation(feed: [anyFeedItem()], timestamp: expiredCacheTimetamp)
         spy.completeLoad(withResult: .success(.result(data)))
-        XCTAssertEqual(spy.messages, [.load, .delete], "expected load and delete message to feed store, got \(spy.messages) instead.")
+        expect(spy, toRecieve: [.load, .delete])
     }
     
-    func test_load_requestsLoadFromRemoteLoaderOnStoreLoadError() {
-        var networkCallCount = 0
-        let exp = XCTestExpectation(description: "waiting for network request.")
-        URLProtocolStub.observe { _ in
-            networkCallCount += 1
-            exp.fulfill()
-        }
+    func test_load_requestsLoadFromRemoteLoaderOnStoreLoadErrorAndSuccessfulDelete() {
         let (sut, spy) = makeSUT()
-        sut.load() { _ in }
-        spy.completeLoad(withResult: .failure(anyNSError()))
-        spy.completeDelete(withResult: .success(()))
-        wait(for: [exp], timeout: 1)
-        XCTAssertEqual(networkCallCount, 1, "expected one network call, got \(networkCallCount) instead.")
-        XCTAssertEqual(spy.messages, [.load, .delete], "expected load and delete message to feed store, got \(spy.messages) instead.")
+        expect(networkCallCounts: 1) {
+            sut.load() { _ in }
+            spy.completeLoad(withResult: .failure(anyNSError()))
+            spy.completeDelete(withResult: .success(()))
+        }
+        expect(spy, toRecieve: [.load, .delete])
+    }
+    
+    func test_load_requestsLoadFromRemoteLoaderOnStoreLoadErrorAndFailedDelete() {
+        let (sut, spy) = makeSUT()
+        expect(networkCallCounts: 1) {
+            sut.load() { _ in }
+            spy.completeLoad(withResult: .failure(anyNSError()))
+            spy.completeDelete(withResult: .failure(anyNSError()))
+        }
+        expect(spy, toRecieve: [.load, .delete])
+    }
+    
+    func test_load_requestsLoadFromRemoteLoaderOnEmptyCacheAndSuccessfulDelete() {
+        let (sut, spy) = makeSUT()
+        expect(networkCallCounts: 1) {
+            sut.load() { _ in }
+            spy.completeLoad(withResult: .success(.empty))
+            spy.completeDelete(withResult: .success(()))
+        }
+        expect(spy, toRecieve: [.load, .delete])
+    }
+    
+    func test_load_requestsLoadFromRemoteLoaderOnEmptyCacheAndFailedDelete() {
+        let (sut, spy) = makeSUT()
+        expect(networkCallCounts: 1) {
+            sut.load() { _ in }
+            spy.completeLoad(withResult: .success(.empty))
+            spy.completeDelete(withResult: .failure(anyNSError()))
+        }
+        expect(spy, toRecieve: [.load, .delete])
+    }
+    
+    func test_load_requestsLoadFromRemoteLoaderOnExpiredCacheAndSuccessfulDelete() {
+        let cacheAge = testCacheMaxAge()
+        let fixedCurrentDate = Date()
+        let (sut, spy) = makeSUT(maxAge: cacheAge, currentDate: { fixedCurrentDate })
+        let expiredCacheTimetamp = fixedCurrentDate
+            .addingTimeInterval(-cacheAge)
+            .addingTimeInterval(-1)
+        let data = FeedStoreDataRepresentation(feed: [anyFeedItem()], timestamp: expiredCacheTimetamp)
+        expect(networkCallCounts: 1) {
+            sut.load() { _ in }
+            spy.completeLoad(withResult: .success(.result(data)))
+            spy.completeDelete(withResult: .success(()))
+        }
+        expect(spy, toRecieve: [.load, .delete])
+    }
+    
+    func test_load_requestsLoadFromRemoteLoaderOnExpiredCacheAndFailedDelete() {
+        let cacheAge = testCacheMaxAge()
+        let fixedCurrentDate = Date()
+        let (sut, spy) = makeSUT(maxAge: cacheAge, currentDate: { fixedCurrentDate })
+        let expiredCacheTimetamp = fixedCurrentDate
+            .addingTimeInterval(-cacheAge)
+            .addingTimeInterval(-1)
+        let data = FeedStoreDataRepresentation(feed: [anyFeedItem()], timestamp: expiredCacheTimetamp)
+        expect(networkCallCounts: 1) {
+            sut.load() { _ in }
+            spy.completeLoad(withResult: .success(.result(data)))
+            spy.completeDelete(withResult: .failure(anyNSError()))
+        }
+        expect(spy, toRecieve: [.load, .delete])
     }
     
     // MARK: helpers
@@ -224,6 +280,36 @@ class FeedCacheTests: XCTestCase {
         trackForMemoryLeaks(remoteLoader, file: file, line: line)
         trackForMemoryLeaks(sut, file: file, line: line)
         return (sut, spy)
+    }
+    
+    func expect(networkCallCounts expectedNetworkCallCount: Int,
+                executing action: () -> (),
+                file: StaticString = #file,
+                line: UInt = #line) {
+        var networkCallCount = 0
+        let exp = XCTestExpectation(description: "waiting for network request.")
+        URLProtocolStub.observe { _ in
+            networkCallCount += 1
+            exp.fulfill()
+        }
+        action()
+        wait(for: [exp], timeout: 1)
+        XCTAssertEqual(networkCallCount,
+                       expectedNetworkCallCount,
+                       "expected \(expectedNetworkCallCount) network calls, got \(networkCallCount) instead.",
+                       file: file,
+                       line: line)
+    }
+    
+    func expect(_ spy: FeedStoreSpy,
+                toRecieve expectedMessages: [FeedStoreSpy.Message],
+                file: StaticString = #file,
+                line: UInt = #line) {
+        XCTAssertEqual(spy.messages,
+                       expectedMessages,
+                       "expected load message to feed store, got \(spy.messages) instead.",
+                       file: file,
+                       line: line)
     }
     
     func testCacheMaxAge() -> TimeInterval {
