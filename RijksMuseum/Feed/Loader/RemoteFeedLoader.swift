@@ -7,7 +7,7 @@
 
 import Foundation
 
-public class RemoteFeedLoader {
+public class RemoteFeedLoader: FeedLoader {
     
     struct RemoteFeedRepresentation: Codable, Equatable {
         let count: Int
@@ -15,13 +15,14 @@ public class RemoteFeedLoader {
     }
     
     let session: URLSession
+    let url: URL
     
-    public init(session: URLSession) {
+    public init(session: URLSession, url: URL) {
         self.session = session
+        self.url = url
     }
     
-    public func load(from url: URL,
-                     completion: @escaping (Result<[FeedItem], Error>) -> Void) {
+    public func load(completion: @escaping (Result<[FeedItem], Error>) -> Void) {
         session.dataTask(with: url) { [weak self] data, response, error in
             guard let self = self else { return }
             if let error = error {
