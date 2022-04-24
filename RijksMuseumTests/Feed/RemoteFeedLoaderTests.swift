@@ -161,9 +161,7 @@ class RemoteFeedLoaderTests: XCTestCase {
     // MARK: helpers
     func makeSUT(file: StaticString = #file, line: UInt = #line) -> RemoteFeedLoader {
         let sut = RemoteFeedLoader(session: .shared)
-        addTeardownBlock { [weak sut] in
-            XCTAssertNil(sut, "instance should be nil", file: file, line: line)
-        }
+        trackForMemoryLeaks(sut, file: file, line: line)
         return sut
     }
     

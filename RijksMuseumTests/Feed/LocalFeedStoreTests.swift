@@ -221,7 +221,7 @@ class LocalFeedStoreTests: XCTestCase {
     func test_load_doesNotCallCompletionAfterSUTDeallocated() {
         var sut: LocalFeedStore? = LocalFeedStore(storeURL: storeURLForTest())
         sut?.load { _ in
-            XCTFail("")
+            XCTFail("completion block should not be called.")
         }
         sut = nil
     }
@@ -229,7 +229,7 @@ class LocalFeedStoreTests: XCTestCase {
     func test_save_doesNotCallCompletionAfterSUTDeallocated() {
         var sut: LocalFeedStore? = LocalFeedStore(storeURL: storeURLForTest())
         sut?.save(data: anyDataRepresentation()) { _ in
-            XCTFail("")
+            XCTFail("completion block should not be called.")
         }
         sut = nil
     }
@@ -237,7 +237,7 @@ class LocalFeedStoreTests: XCTestCase {
     func test_delete_doesNotCallCompletionAfterSUTDeallocated() {
         var sut: LocalFeedStore? = LocalFeedStore(storeURL: storeURLForTest())
         sut?.delete { _ in
-            XCTFail("")
+            XCTFail("completion block should not be called.")
         }
         sut = nil
     }
@@ -246,9 +246,7 @@ class LocalFeedStoreTests: XCTestCase {
     
     func makeSUT(storeURL: URL, file: StaticString = #file, line: UInt = #line) -> LocalFeedStore {
         let sut = LocalFeedStore(storeURL: storeURL)
-        addTeardownBlock { [weak sut] in
-            XCTAssertNil(sut, "sut should be deallocated", file: file, line: line)
-        }
+        trackForMemoryLeaks(sut, file: file, line: line)
         return sut
     }
     

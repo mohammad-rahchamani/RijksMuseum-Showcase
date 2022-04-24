@@ -39,3 +39,11 @@ public extension XCTestCase {
         RemoteFeedLoader.remoteRepresentaionData(for: data)!
     }
 }
+
+extension XCTestCase {
+    func trackForMemoryLeaks(_ instance: AnyObject, file: StaticString = #file, line: UInt = #line) {
+        addTeardownBlock { [weak instance] in
+            XCTAssertNil(instance, "instance should be nil", file: file, line: line)
+        }
+    }
+}
