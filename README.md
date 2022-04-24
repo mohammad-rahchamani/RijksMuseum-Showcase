@@ -94,6 +94,11 @@
 3. Writes data to local storage
 4. Delivers data
 
+#### Delete storage error course:
+1. Loads feed from remote loader
+2. Writes data to local storage
+3. Delivers data
+
 #### Load feed from remote loader error course:
 1. Delivers error
  

@@ -8,8 +8,8 @@
 import Foundation
 
 public struct FeedStoreDataRepresentation: Equatable, Codable {
-    let feed: [FeedItem]
-    let timestamp: Date
+    public let feed: [FeedItem]
+    public let timestamp: Date
     
     public init(feed: [FeedItem], timestamp: Date) {
         self.feed = feed
