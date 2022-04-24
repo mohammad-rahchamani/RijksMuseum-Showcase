@@ -74,7 +74,6 @@ struct FeedImage: Equatable, Codable {
     }
 }
 
-
 struct FeedItem: Equatable, Codable {
     
     let id: String
@@ -99,8 +98,12 @@ struct FeedItem: Equatable, Codable {
     }
 }
 
-
 class RemoteFeedLoader {
+    
+    struct RemoteFeedRepresentation: Codable, Equatable {
+        let count: Int
+        let artObjects: [FeedItem]
+    }
     
     let session: URLSession
     
@@ -128,10 +131,15 @@ class RemoteFeedLoader {
     }
     
     private func parse(_ data: Data?) -> Result<[FeedItem], Swift.Error> {
-        guard data != nil else {
+        guard let data = data else {
             return .failure(RemoteFeedLoaderError.invalidResponse)
         }
-        return .success([])
+        do {
+            let feed = try JSONDecoder().decode(RemoteFeedRepresentation.self, from: data)
+            return .success(feed.artObjects)
+        } catch {
+            return .failure(RemoteFeedLoaderError.decodeError)
+        }
     }
     
     private enum RemoteFeedLoaderError: Error {
@@ -140,6 +148,18 @@ class RemoteFeedLoader {
     }
     
 }
+
+
+extension RemoteFeedLoader {
+    /// for testing purpose only
+    public static func remoteRepresentaionData(for items: [FeedItem]) -> Data? {
+        
+        let feed = RemoteFeedRepresentation(count: items.count, artObjects: items)
+        return try? JSONEncoder().encode(feed)
+        
+    }
+}
+
 
 class RemoteFeedLoaderTests: XCTestCase {
 
@@ -204,7 +224,7 @@ class RemoteFeedLoaderTests: XCTestCase {
     }
     
     func test_load_failsOnNetworkErrorAndValidResponseAndData() throws {
-        URLProtocolStub.stub(withData: Data(),
+        URLProtocolStub.stub(withData: getData(from: [anyFeedItem()]),
                              response: httpResponse(withCode: 200),
                              error: anyNSError())
         let sut = makeSUT()
@@ -222,8 +242,17 @@ class RemoteFeedLoaderTests: XCTestCase {
         expect(sut, toCompleteWithResult: .failure(anyNSError()))
     }
     
-    func test_load_failsOnNonHttpResponseAndData() throws {
-        URLProtocolStub.stub(withData: Data(),
+    func test_load_failsOnHttpResponseAndNoData() throws {
+        URLProtocolStub.stub(withData: nil,
+                             response: httpResponse(withCode: 200),
+                             error: nil)
+        let sut = makeSUT()
+        expect(sut, toCompleteWithResult: .failure(anyNSError()))
+    }
+    
+    func test_load_failsOnNonHttpResponseAndValidData() throws {
+        let items: [FeedItem] = [anyFeedItem(), anyFeedItem(), anyFeedItem()]
+        URLProtocolStub.stub(withData: getData(from: items),
                              response: URLResponse(url: anyURL(),
                                                    mimeType: nil,
                                                    expectedContentLength: 0,
@@ -231,6 +260,44 @@ class RemoteFeedLoaderTests: XCTestCase {
                              error: nil)
         let sut = makeSUT()
         expect(sut, toCompleteWithResult: .failure(anyNSError()))
+    }
+    
+    func test_load_failsOn200HttpResponseAndInvalidData() throws {
+        URLProtocolStub.stub(withData: invalidData(),
+                             response: httpResponse(withCode: 200),
+                             error: nil)
+        let sut = makeSUT()
+        expect(sut, toCompleteWithResult: .failure(anyNSError()))
+    }
+    
+    func test_load_failsOnNon200HttpResponseAndValidData() throws {
+        let items: [FeedItem] = [anyFeedItem(), anyFeedItem(), anyFeedItem()]
+        let codes = [0, 199, 300, 400, 500]
+        let sut = makeSUT()
+        for code in codes {
+            URLProtocolStub.stub(withData: getData(from: items),
+                                 response: httpResponse(withCode: code),
+                                 error: nil)
+            expect(sut, toCompleteWithResult: .failure(anyNSError()))
+        }
+    }
+    
+    func test_load_failsOnDataWithNoResponse() throws {
+        let items: [FeedItem] = [anyFeedItem(), anyFeedItem(), anyFeedItem()]
+        let sut = makeSUT()
+        URLProtocolStub.stub(withData: getData(from: items),
+                             response: nil,
+                             error: nil)
+        expect(sut, toCompleteWithResult: .failure(anyNSError()))
+    }
+    
+    func test_load_ReturnsDataOnSuccess() throws {
+        let items: [FeedItem] = [anyFeedItem(), anyFeedItem(), anyFeedItem()]
+        let sut = makeSUT()
+        URLProtocolStub.stub(withData: getData(from: items),
+                             response: httpResponse(withCode: 200),
+                             error: nil)
+        expect(sut, toCompleteWithResult: .success(items))
     }
     
     // MARK: helpers
@@ -265,6 +332,10 @@ class RemoteFeedLoaderTests: XCTestCase {
                         headerFields: nil)!
     }
     
+    func invalidData() -> Data {
+        "invalid data".data(using: .utf8)!
+    }
+    
     func anyFeedImage() -> FeedImage {
         FeedImage(guid: "guid", url: "url string")
     }
@@ -285,5 +356,8 @@ class RemoteFeedLoaderTests: XCTestCase {
     func anyNSError() -> NSError {
         NSError(domain: "any error", code: 1, userInfo: nil)
     }
-
+    
+    func getData(from data: [FeedItem]) -> Data {
+        RemoteFeedLoader.remoteRepresentaionData(for: data)!
+    }
 }
