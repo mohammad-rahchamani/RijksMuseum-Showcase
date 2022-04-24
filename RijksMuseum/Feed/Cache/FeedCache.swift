@@ -7,7 +7,7 @@
 
 import Foundation
 
-public class FeedCache {
+public class FeedCache: FeedLoader {
     
     private let store: FeedStore
     private let loader: FeedLoader

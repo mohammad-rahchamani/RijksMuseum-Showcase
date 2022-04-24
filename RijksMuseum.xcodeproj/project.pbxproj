@@ -111,13 +111,21 @@
 			path = Helpers;
 			sourceTree = "<group>";
 		};
+		B502249128161252009F3267 /* Cache */ = {
+			isa = PBXGroup;
+			children = (
+				B502248F2816119F009F3267 /* FeedCache.swift */,
+			);
+			path = Cache;
+			sourceTree = "<group>";
+		};
 		B506AC84281573F600002A8E /* Feed */ = {
 			isa = PBXGroup;
 			children = (
+				B502249128161252009F3267 /* Cache */,
 				B506AC952815AAC400002A8E /* Store */,
 				B506AC8D281574CF00002A8E /* Loader */,
 				B506AC85281573FE00002A8E /* Model */,
-				B502248F2816119F009F3267 /* FeedCache.swift */,
 			);
 			path = Feed;
 			sourceTree = "<group>";
