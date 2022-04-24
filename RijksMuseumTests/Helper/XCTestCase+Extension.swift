@@ -38,6 +38,20 @@ public extension XCTestCase {
     func getData(from data: [FeedItem]) -> Data {
         RemoteFeedLoader.remoteRepresentaionData(for: data)!
     }
+    
+    func anyURLResponse() -> URLResponse {
+        URLResponse(url: anyURL(),
+                    mimeType: nil,
+                    expectedContentLength: 0,
+                    textEncodingName: nil)
+    }
+    
+    func httpResponse(withCode code: Int) -> HTTPURLResponse {
+        HTTPURLResponse(url: anyURL(),
+                        statusCode: code,
+                        httpVersion: nil,
+                        headerFields: nil)!
+    }
 }
 
 extension XCTestCase {

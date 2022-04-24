@@ -80,10 +80,7 @@ class RemoteFeedLoaderTests: XCTestCase {
     
     func test_load_failsOnNonHttpResponse() throws {
         URLProtocolStub.stub(withData: nil,
-                             response: URLResponse(url: anyURL(),
-                                                   mimeType: nil,
-                                                   expectedContentLength: 0,
-                                                   textEncodingName: nil),
+                             response: anyURLResponse(),
                              error: nil)
         let sut = makeSUT()
         expect(sut, toCompleteWithResult: .failure(anyNSError()))
@@ -100,10 +97,7 @@ class RemoteFeedLoaderTests: XCTestCase {
     func test_load_failsOnNonHttpResponseAndValidData() throws {
         let items: [FeedItem] = [anyFeedItem(), anyFeedItem(), anyFeedItem()]
         URLProtocolStub.stub(withData: getData(from: items),
-                             response: URLResponse(url: anyURL(),
-                                                   mimeType: nil,
-                                                   expectedContentLength: 0,
-                                                   textEncodingName: nil),
+                             response: anyURLResponse(),
                              error: nil)
         let sut = makeSUT()
         expect(sut, toCompleteWithResult: .failure(anyNSError()))
@@ -182,12 +176,5 @@ class RemoteFeedLoaderTests: XCTestCase {
             exp.fulfill()
         }
         wait(for: [exp], timeout: 1)
-    }
-    
-    func httpResponse(withCode code: Int) -> HTTPURLResponse {
-        HTTPURLResponse(url: anyURL(),
-                        statusCode: code,
-                        httpVersion: nil,
-                        headerFields: nil)!
     }
 }
