@@ -10,20 +10,12 @@ import RijksMuseum
 
 class LocalFeedStore {
     
-    typealias DataRepresentation = (feed: [FeedItem], timestamp: Date)
+    struct DataRepresentation: Equatable, Codable {
+        let feed: [FeedItem]
+        let timestamp: Date
+    }
     
     enum LoadResult: Equatable {
-        static func == (lhs: LocalFeedStore.LoadResult, rhs: LocalFeedStore.LoadResult) -> Bool {
-            switch (lhs, rhs) {
-            case (.empty, .empty):
-                return true
-            case (.result(let lData), .result(let rData)):
-                return lData.feed == rData.feed && lData.timestamp == rData.timestamp
-            default:
-                return false
-            }
-        }
-        
         case empty
         case result(DataRepresentation)
     }
@@ -41,9 +33,16 @@ class LocalFeedStore {
     }
     
     func load(completion: @escaping (Result<LoadResult, Error>) -> Void) {
+        
         do {
-            _ = try Data(contentsOf: storeURL)
-            completion(.success(.empty))
+            let data = try Data(contentsOf: storeURL)
+            guard !data.isEmpty else {
+                completion(.success(.empty))
+                return
+            }
+            let decoder = JSONDecoder()
+            let parsedData = try decoder.decode(DataRepresentation.self, from: data)
+            completion(.success(.result(parsedData)))
         } catch {
             completion(.failure(error))
         }
@@ -53,7 +52,14 @@ class LocalFeedStore {
     
     func save(data: DataRepresentation,
               completion: @escaping (Result<Void, Error>) -> Void) {
-        
+        do {
+            let encoder = JSONEncoder()
+            let encodedData = try encoder.encode(data)
+            try encodedData.write(to: storeURL)
+            completion(.success(()))
+        } catch {
+            completion(.failure(error))
+        }
     }
     
     func delete(completion: @escaping (Result<Void, Error>) -> Void) {
@@ -100,6 +106,61 @@ class LocalFeedStoreTests: XCTestCase {
         expect(sut, toCompleteLoadWith: .failure(anyNSError()))
     }
     
+    func test_load_deliversDataFromStore() {
+        let sut = makeSUT(storeURL: storeURLForTest())
+        let feed = [anyFeedItem(), anyFeedItem(), anyFeedItem()]
+        let timestamp = Date()
+        let expectedResult = LocalFeedStore.DataRepresentation(feed: feed, timestamp: timestamp)
+        save(expectedResult, to: sut)
+        expect(sut, toCompleteLoadWith: .success(.result(expectedResult)))
+    }
+    
+    func test_load_hasNoSideEffectsOnStoreWithData() {
+        let sut = makeSUT(storeURL: storeURLForTest())
+        let feed = [anyFeedItem(), anyFeedItem(), anyFeedItem()]
+        let timestamp = Date()
+        let expectedResult = LocalFeedStore.DataRepresentation(feed: feed, timestamp: timestamp)
+        save(expectedResult, to: sut)
+        expect(sut, toCompleteLoadWith: .success(.result(expectedResult)))
+        expect(sut, toCompleteLoadWith: .success(.result(expectedResult)))
+    }
+    
+    func test_save_completesSuccessfullyOnValidDataAndValidStoreURL() {
+        let sut = makeSUT(storeURL: storeURLForTest())
+        let feed = [anyFeedItem(), anyFeedItem(), anyFeedItem()]
+        let timestamp = Date()
+        let expectedResult = LocalFeedStore.DataRepresentation(feed: feed, timestamp: timestamp)
+        expect(sut,
+               toSave: expectedResult,
+               andCompleteSaveWith: .success(()))
+    }
+    
+    func test_save_writesDataToStore() {
+        let sut = makeSUT(storeURL: storeURLForTest())
+        let feed = [anyFeedItem(), anyFeedItem(), anyFeedItem()]
+        let timestamp = Date()
+        let expectedResult = LocalFeedStore.DataRepresentation(feed: feed, timestamp: timestamp)
+        save(expectedResult, to: sut)
+        expect(sut, toCompleteLoadWith: .success(.result(expectedResult)))
+    }
+    
+    func test_save_overridesDataOnStoreWithValue() {
+        let sut = makeSUT(storeURL: storeURLForTest())
+        let sampleData = LocalFeedStore.DataRepresentation(feed: [anyFeedItem()], timestamp: Date())
+        let expectedResult = LocalFeedStore.DataRepresentation(feed: [anyFeedItem(), anyFeedItem()],
+                                                               timestamp: Date())
+        save(sampleData, to: sut)
+        save(expectedResult, to: sut)
+        expect(sut, toCompleteLoadWith: .success(.result(expectedResult)))
+    }
+    
+    func test_save_failsOnStoreError() {
+        let sut = makeSUT(storeURL: invalidStoreURL())
+        let data = LocalFeedStore.DataRepresentation(feed: [anyFeedItem(), anyFeedItem()],
+                                                     timestamp: Date())
+        expect(sut, toSave: data, andCompleteSaveWith: .failure(anyNSError()))
+    }
+    
     // MARK: helpers
     
     func makeSUT(storeURL: URL, file: StaticString = #file, line: UInt = #line) -> LocalFeedStore {
@@ -127,6 +188,30 @@ class LocalFeedStoreTests: XCTestCase {
             exp.fulfill()
         }
         wait(for: [exp], timeout: 1)
+    }
+    
+    func expect(_ sut: LocalFeedStore,
+                toSave data: LocalFeedStore.DataRepresentation,
+                andCompleteSaveWith expectedResult: Result<Void, Error>,
+                file: StaticString = #file,
+                line: UInt = #line) {
+        let exp = XCTestExpectation(description: "waiting for save completion")
+        sut.save(data: data) { capturedResult in
+            switch (capturedResult, expectedResult) {
+            case (.failure, .failure):
+                ()
+            case (.success, .success):
+                ()
+            default:
+                XCTFail("expected \(expectedResult), got \(capturedResult) instead.", file: file, line: line)
+            }
+            exp.fulfill()
+        }
+        wait(for: [exp], timeout: 1)
+    }
+    
+    func save(_ data: LocalFeedStore.DataRepresentation, to store: LocalFeedStore) {
+        store.save(data: data) { _ in }
     }
     
     func storeURLForTest() -> URL {
