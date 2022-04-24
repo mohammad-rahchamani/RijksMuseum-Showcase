@@ -35,7 +35,7 @@ class RemoteFeedLoaderTests: XCTestCase {
             exp.fulfill()
         }
         let sut = makeSUT()
-        sut.load(from: anyURL()) { _ in }
+        sut.load { _ in }
         wait(for: [exp], timeout: 1)
         XCTAssertEqual(requestCount, 1, "not expecting requests on init. got \(requestCount).")
     }
@@ -148,11 +148,11 @@ class RemoteFeedLoaderTests: XCTestCase {
     }
     
     func test_load_doesNotCallCompletionAfterLoaderDeallocated() {
-        var sut: RemoteFeedLoader? = RemoteFeedLoader(session: .shared)
+        var sut: RemoteFeedLoader? = RemoteFeedLoader(session: .shared, url: anyURL())
         URLProtocolStub.stub(withData: getData(from: [anyFeedItem()]),
                              response: httpResponse(withCode: 200),
                              error: nil)
-        sut?.load(from: anyURL()) { _ in
+        sut?.load { _ in
             XCTFail("completion should not be called.")
         }
         sut = nil
@@ -160,18 +160,17 @@ class RemoteFeedLoaderTests: XCTestCase {
     
     // MARK: helpers
     func makeSUT(file: StaticString = #file, line: UInt = #line) -> RemoteFeedLoader {
-        let sut = RemoteFeedLoader(session: .shared)
+        let sut = RemoteFeedLoader(session: .shared, url: anyURL())
         trackForMemoryLeaks(sut, file: file, line: line)
         return sut
     }
     
     func expect(_ sut: RemoteFeedLoader,
-                toLoadFrom url: URL = URL(string: "https://any-url.com")!,
                 toCompleteWithResult expectedResult: Result<[FeedItem], Error>,
                 file: StaticString = #file,
                 line: UInt = #line) {
         let exp = XCTestExpectation(description: "waiting for load result")
-        sut.load(from: url) { capturedResult in
+        sut.load{ capturedResult in
             switch (capturedResult, expectedResult) {
             case (.success(let capturedData), .success(let expectedData)):
                 XCTAssertEqual(capturedData, expectedData, "expected \(expectedData) got \(capturedData).", file: file, line: line)
