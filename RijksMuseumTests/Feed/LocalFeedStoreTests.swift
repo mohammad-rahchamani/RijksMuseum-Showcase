@@ -63,7 +63,12 @@ class LocalFeedStore {
     }
     
     func delete(completion: @escaping (Result<Void, Error>) -> Void) {
-        
+        do {
+            try Data().write(to: storeURL)
+            completion(.success(()))
+        } catch {
+            completion(.failure(error))
+        }
     }
     
     
@@ -161,6 +166,24 @@ class LocalFeedStoreTests: XCTestCase {
         expect(sut, toSave: data, andCompleteSaveWith: .failure(anyNSError()))
     }
     
+    func test_delete_failsOnStoreError() {
+        let sut = makeSUT(storeURL: invalidStoreURL())
+        expect(sut, toCompleteDeleteWith: .failure(anyNSError()))
+    }
+    
+    func test_delete_finishesSuccessfullyOnEmptyStore() {
+        let sut = makeSUT(storeURL: storeURLForTest())
+        expect(sut, toCompleteDeleteWith: .success(()))
+    }
+    
+    func test_delete_removesDataFromStoreWithData() {
+        let sut = makeSUT(storeURL: storeURLForTest())
+        let data = LocalFeedStore.DataRepresentation(feed: [anyFeedItem()], timestamp: Date())
+        save(data, to: sut)
+        sut.delete { _ in }
+        expect(sut, toCompleteLoadWith: .success(.empty))
+    }
+    
     // MARK: helpers
     
     func makeSUT(storeURL: URL, file: StaticString = #file, line: UInt = #line) -> LocalFeedStore {
@@ -197,6 +220,25 @@ class LocalFeedStoreTests: XCTestCase {
                 line: UInt = #line) {
         let exp = XCTestExpectation(description: "waiting for save completion")
         sut.save(data: data) { capturedResult in
+            switch (capturedResult, expectedResult) {
+            case (.failure, .failure):
+                ()
+            case (.success, .success):
+                ()
+            default:
+                XCTFail("expected \(expectedResult), got \(capturedResult) instead.", file: file, line: line)
+            }
+            exp.fulfill()
+        }
+        wait(for: [exp], timeout: 1)
+    }
+    
+    func expect(_ sut: LocalFeedStore,
+                toCompleteDeleteWith expectedResult: Result<Void, Error>,
+                file: StaticString = #file,
+                line: UInt = #line) {
+        let exp = XCTestExpectation(description: "waiting for delete completion")
+        sut.delete { capturedResult in
             switch (capturedResult, expectedResult) {
             case (.failure, .failure):
                 ()
