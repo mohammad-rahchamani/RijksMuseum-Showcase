@@ -9,7 +9,7 @@
 
 #### Primary course:
 1. Requests feed from remote API
-2. Validates data
+2. Decodes data
 3. Creates a list of feed items
 4. Delivers feed items
 
@@ -25,7 +25,7 @@
 
 #### Primary course:
 1. Reads data from the given URL
-2. Validates data
+2. Decodes data
 3. Creates a list of feed items and a timestamp
 4. Delivers feed items and timestamp
 
@@ -51,7 +51,7 @@
 
 #### Data:
 - [FeedItem]
-- Date
+- Date (timestamp)
 
 #### Primary course:
 1. Encodes feed items and timestamp to json
@@ -65,6 +65,41 @@
 1. Delivers error
 
 -------------
+
+### Load Feed From Cache Use Case
+
+#### Data:
+- TimeInterval (cache expiration)
+
+#### Valid cache course:
+1. Loads feed from local storage
+2. Checks data for expiration
+3. Delivers result
+
+#### Empty cache from local storage course:
+1. Deletes local storage data
+2. Loads feed from remote loader
+3. Writes data to local storage
+4. Delivers data
+
+#### Expired cache course:
+1. Deletes local storage data
+2. Loads feed from remote loader
+3. Writes data to local storage
+4. Delivers data
+
+#### Local storage load error course:
+1. Deletes local storage data
+2. Loads feed from remote loader
+3. Writes data to local storage
+4. Delivers data
+
+#### Load feed from remote loader error course:
+1. Delivers error
+ 
+#### Write to local storage error course:
+1. Delivers data
+
 
 ### Payload Contract
 
