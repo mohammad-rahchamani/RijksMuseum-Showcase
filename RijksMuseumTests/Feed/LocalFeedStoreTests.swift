@@ -1,14 +1,13 @@
 //
-//  RijksMuseumTests.swift
+//  LocalFeedStoreTests.swift
 //  RijksMuseumTests
 //
 //  Created by Mohammad Rahchamani on 4/24/22.
 //
 
 import XCTest
-@testable import RijksMuseum
 
-class RijksMuseumTests: XCTestCase {
+class LocalFeedStoreTests: XCTestCase {
 
     override func setUpWithError() throws {
         // Put setup code here. This method is called before the invocation of each test method in the class.
