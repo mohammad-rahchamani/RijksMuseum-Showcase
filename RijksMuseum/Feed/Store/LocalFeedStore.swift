@@ -7,22 +7,7 @@
 
 import Foundation
 
-public class LocalFeedStore {
-    
-    public struct DataRepresentation: Equatable, Codable {
-        let feed: [FeedItem]
-        let timestamp: Date
-        
-        public init(feed: [FeedItem], timestamp: Date) {
-            self.feed = feed
-            self.timestamp = timestamp
-        }
-    }
-    
-    public enum LoadResult: Equatable {
-        case empty
-        case result(DataRepresentation)
-    }
+public class LocalFeedStore: FeedStore {
     
     private let storeURL: URL
     private let queue = DispatchQueue(label: "\(type(of: LocalFeedStore.self))",
