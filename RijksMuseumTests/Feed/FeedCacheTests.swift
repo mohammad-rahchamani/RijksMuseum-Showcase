@@ -264,6 +264,90 @@ class FeedCacheTests: XCTestCase {
         expect(spy, toRecieve: [.load, .delete])
     }
     
+    func test_load_failsOnStoreLoadErrorAndSuccessfulDeleteAndLoaderError() {
+        URLProtocolStub.stub(withData: nil,
+                             response: nil,
+                             error: anyNSError())
+        let (sut, spy) = makeSUT()
+        expect(sut,
+               toCompleteLoadWith: .failure(anyNSError())) {
+            spy.completeLoad(withResult: .failure(anyNSError()))
+            spy.completeDelete(withResult: .success(()))
+        }
+    }
+    
+    func test_load_failsOnStoreLoadErrorAndDeleteErrorAndLoaderError() {
+        URLProtocolStub.stub(withData: nil,
+                             response: nil,
+                             error: anyNSError())
+        let (sut, spy) = makeSUT()
+        expect(sut,
+               toCompleteLoadWith: .failure(anyNSError())) {
+            spy.completeLoad(withResult: .failure(anyNSError()))
+            spy.completeDelete(withResult: .failure(anyNSError()))
+        }
+    }
+    
+    func test_load_failsOnEmptyCacheAndDeleteErrorAndLoaderError() {
+        URLProtocolStub.stub(withData: nil,
+                             response: nil,
+                             error: anyNSError())
+        let (sut, spy) = makeSUT()
+        expect(sut,
+               toCompleteLoadWith: .failure(anyNSError())) {
+            spy.completeLoad(withResult: .success(.empty))
+            spy.completeDelete(withResult: .failure(anyNSError()))
+        }
+    }
+    
+    func test_load_failsOnEmptyCacheAndSuccessfulDeleteAndLoaderError() {
+        URLProtocolStub.stub(withData: nil,
+                             response: nil,
+                             error: anyNSError())
+        let (sut, spy) = makeSUT()
+        expect(sut,
+               toCompleteLoadWith: .failure(anyNSError())) {
+            spy.completeLoad(withResult: .success(.empty))
+            spy.completeDelete(withResult: .success(()))
+        }
+    }
+    
+    func test_load_failsOnExpiredCacheAndDeleteErrorAndLoaderError() {
+        URLProtocolStub.stub(withData: nil,
+                             response: nil,
+                             error: anyNSError())
+        let cacheAge = testCacheMaxAge()
+        let fixedCurrentDate = Date()
+        let (sut, spy) = makeSUT(maxAge: cacheAge, currentDate: { fixedCurrentDate })
+        let expiredCacheTimetamp = fixedCurrentDate
+            .addingTimeInterval(-cacheAge)
+            .addingTimeInterval(-1)
+        let data = FeedStoreDataRepresentation(feed: [anyFeedItem()], timestamp: expiredCacheTimetamp)
+        expect(sut,
+               toCompleteLoadWith: .failure(anyNSError())) {
+            spy.completeLoad(withResult: .success(.result(data)))
+            spy.completeDelete(withResult: .failure(anyNSError()))
+        }
+    }
+    
+    func test_load_failsOnExpiredCacheAndSuccessfulDeleteAndLoaderError() {
+        URLProtocolStub.stub(withData: nil,
+                             response: nil,
+                             error: anyNSError())
+        let cacheAge = testCacheMaxAge()
+        let fixedCurrentDate = Date()
+        let (sut, spy) = makeSUT(maxAge: cacheAge, currentDate: { fixedCurrentDate })
+        let expiredCacheTimetamp = fixedCurrentDate
+            .addingTimeInterval(-cacheAge)
+            .addingTimeInterval(-1)
+        let data = FeedStoreDataRepresentation(feed: [anyFeedItem()], timestamp: expiredCacheTimetamp)
+        expect(sut,
+               toCompleteLoadWith: .failure(anyNSError())) {
+            spy.completeLoad(withResult: .success(.result(data)))
+            spy.completeDelete(withResult: .success(()))
+        }
+    }
+    
     // MARK: helpers
     
     func makeSUT(maxAge: TimeInterval = 5*60,
@@ -280,6 +364,40 @@ class FeedCacheTests: XCTestCase {
         trackForMemoryLeaks(remoteLoader, file: file, line: line)
         trackForMemoryLeaks(sut, file: file, line: line)
         return (sut, spy)
+    }
+    
+    func expect(_ sut: FeedCache,
+                toCompleteLoadWith expectedResult: Result<[FeedItem], Error>,
+                executing action: () -> (),
+                file: StaticString = #file,
+                line: UInt = #line) {
+        let exp = XCTestExpectation(description: "waiting for load completion")
+        var capturedResult: [Result<[FeedItem], Error>] = []
+        sut.load { loadResult in
+            capturedResult.append(loadResult)
+            exp.fulfill()
+        }
+        action()
+        wait(for: [exp], timeout: 1)
+        XCTAssertEqual(capturedResult.count,
+                       1,
+                       "expected completion to be called once.",
+                       file: file,
+                       line: line)
+        switch (capturedResult.first!, expectedResult) {
+        case (.failure, .failure):
+            ()
+        case (.success(let capturedItems), .success(let expectedItems)):
+            XCTAssertEqual(capturedItems,
+                           expectedItems,
+                           "expected \(expectedItems), got \(capturedItems) instead.",
+                           file: file,
+                           line: line)
+        default:
+            XCTFail("expected \(expectedResult), got \(capturedResult.first!) instead",
+                    file: file,
+                    line: line)
+        }
     }
     
     func expect(networkCallCounts expectedNetworkCallCount: Int,
