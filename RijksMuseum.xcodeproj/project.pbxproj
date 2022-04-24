@@ -14,6 +14,7 @@
 		B5609C1A281554BC004F6D2D /* RijksMuseumTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5609C19281554BC004F6D2D /* RijksMuseumTests.swift */; };
 		B5609C24281554BC004F6D2D /* RijksMuseumUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5609C23281554BC004F6D2D /* RijksMuseumUITests.swift */; };
 		B5609C26281554BC004F6D2D /* RijksMuseumUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5609C25281554BC004F6D2D /* RijksMuseumUITestsLaunchTests.swift */; };
+		B5609C3428155514004F6D2D /* RemoteFeedLoaderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5609C3328155514004F6D2D /* RemoteFeedLoaderTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -45,6 +46,7 @@
 		B5609C23281554BC004F6D2D /* RijksMuseumUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RijksMuseumUITests.swift; sourceTree = "<group>"; };
 		B5609C25281554BC004F6D2D /* RijksMuseumUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RijksMuseumUITestsLaunchTests.swift; sourceTree = "<group>"; };
 		B5609C32281554ED004F6D2D /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		B5609C3328155514004F6D2D /* RemoteFeedLoaderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteFeedLoaderTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -116,6 +118,7 @@
 			isa = PBXGroup;
 			children = (
 				B5609C19281554BC004F6D2D /* RijksMuseumTests.swift */,
+				B5609C3328155514004F6D2D /* RemoteFeedLoaderTests.swift */,
 			);
 			path = RijksMuseumTests;
 			sourceTree = "<group>";
@@ -268,6 +271,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B5609C3428155514004F6D2D /* RemoteFeedLoaderTests.swift in Sources */,
 				B5609C1A281554BC004F6D2D /* RijksMuseumTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
