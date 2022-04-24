@@ -67,12 +67,19 @@ class FeedStoreSpy: FeedStore {
 
 class FeedCache {
     
-    let store: FeedStore
-    let remoteLoader: RemoteFeedLoader
+    private let store: FeedStore
+    private let remoteLoader: RemoteFeedLoader
+    private let maxAge: TimeInterval
+    private let currentDate: () -> Date
     
-    init(store: FeedStore, remoteLoader: RemoteFeedLoader) {
+    init(store: FeedStore,
+         remoteLoader: RemoteFeedLoader,
+         maxAge: TimeInterval,
+         currentDate: @escaping () -> Date) {
         self.store = store
         self.remoteLoader = remoteLoader
+        self.maxAge = maxAge
+        self.currentDate = currentDate
     }
     
     func load(completion: @escaping (Result<[FeedItem], Error>) -> Void) {
@@ -95,15 +102,31 @@ class FeedCache {
     }
     
     private func handleStoreLoadResult(_ result: FeedStoreResult,
-                                       completion: @escaping (Result<[FeedItem], Error>) -> Void ) {
+                                       completion: @escaping (Result<[FeedItem], Error>) -> Void) {
         switch result {
         case .empty:
             removeStoreData {
                 completion(.success([]))
             }
         case .result(let feedStoreDataRepresentation):
-            completion(.success(feedStoreDataRepresentation.feed))
+            handleCachedFeed(cache: feedStoreDataRepresentation,
+                             completion: completion)
         }
+    }
+    
+    private func handleCachedFeed(cache: FeedStore.DataRepresentation,
+                                  completion: @escaping (Result<[FeedItem], Error>) -> Void) {
+        if isCacheValid(cache: cache) {
+            completion(.success(cache.feed))
+        } else {
+            removeStoreData {
+                completion(.success([]))
+            }
+        }
+    }
+    
+    private func isCacheValid(cache: FeedStore.DataRepresentation) -> Bool {
+        currentDate().timeIntervalSince(cache.timestamp) <= maxAge
     }
     
 }
@@ -150,17 +173,39 @@ class FeedCacheTests: XCTestCase {
         XCTAssertEqual(spy.messages, [.load, .delete], "expected load and delete message to feed store, got \(spy.messages) instead.")
     }
     
+    func test_load_requestsDeleteOnExpiredCache() {
+        let cacheAge = testCacheMaxAge()
+        let fixedCurrentDate = Date()
+        let (sut, spy) = makeSUT(maxAge: cacheAge, currentDate: { fixedCurrentDate })
+        sut.load() { _ in }
+        let expiredCacheTimetamp = fixedCurrentDate
+            .addingTimeInterval(-cacheAge)
+            .addingTimeInterval(-1)
+        let data = FeedStoreDataRepresentation(feed: [anyFeedItem()], timestamp: expiredCacheTimetamp)
+        spy.completeLoad(withResult: .success(.result(data)))
+        XCTAssertEqual(spy.messages, [.load, .delete], "expected load and delete message to feed store, got \(spy.messages) instead.")
+    }
+    
     // MARK: helpers
     
-    func makeSUT(file: StaticString = #file,
+    func makeSUT(maxAge: TimeInterval = 5*60,
+                 currentDate: @escaping () -> Date = Date.init,
+                 file: StaticString = #file,
                  line: UInt = #line) -> (FeedCache, FeedStoreSpy) {
         let spy = FeedStoreSpy()
         let remoteLoader = RemoteFeedLoader(session: .shared)
-        let sut = FeedCache(store: spy, remoteLoader: remoteLoader)
+        let sut = FeedCache(store: spy,
+                            remoteLoader: remoteLoader,
+                            maxAge: maxAge,
+                            currentDate: currentDate)
         trackForMemoryLeaks(spy, file: file, line: line)
         trackForMemoryLeaks(remoteLoader, file: file, line: line)
         trackForMemoryLeaks(sut, file: file, line: line)
         return (sut, spy)
+    }
+    
+    func testCacheMaxAge() -> TimeInterval {
+        5 * 60
     }
 
 }
