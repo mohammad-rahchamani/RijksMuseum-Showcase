@@ -604,6 +604,37 @@ class FeedCacheTests: XCTestCase {
         }
     }
     
+    // MARK: -load delivers valid cache from store
+    
+    func test_load_deliversDataOnValidCacheBeforeMaxAge() {
+        let cacheAge = testCacheMaxAge()
+        let fixedCurrentDate = Date()
+        let expectedItems = [anyFeedItem()]
+        let notExpiredCacheTimetamp = fixedCurrentDate
+            .addingTimeInterval(-cacheAge)
+            .addingTimeInterval(1)
+        let expectedData = FeedStoreDataRepresentation(feed: expectedItems,
+                                                     timestamp: notExpiredCacheTimetamp)
+        let (sut, storeSpy, _) = makeSUT(maxAge: cacheAge, currentDate: { fixedCurrentDate })
+        expect(sut, toCompleteLoadWith: .success(expectedItems)) {
+            storeSpy.completeLoad(withResult: .success(.result(expectedData)))
+        }
+    }
+    
+    func test_load_deliversDataOnValidCacheMaxAge() {
+        let cacheAge = testCacheMaxAge()
+        let fixedCurrentDate = Date()
+        let expectedItems = [anyFeedItem()]
+        let notExpiredCacheTimetamp = fixedCurrentDate
+            .addingTimeInterval(-cacheAge)
+        let expectedData = FeedStoreDataRepresentation(feed: expectedItems,
+                                                     timestamp: notExpiredCacheTimetamp)
+        let (sut, storeSpy, _) = makeSUT(maxAge: cacheAge, currentDate: { fixedCurrentDate })
+        expect(sut, toCompleteLoadWith: .success(expectedItems)) {
+            storeSpy.completeLoad(withResult: .success(.result(expectedData)))
+        }
+    }
+    
     // MARK: -helpers
     
     func makeSUT(maxAge: TimeInterval = 5*60,
