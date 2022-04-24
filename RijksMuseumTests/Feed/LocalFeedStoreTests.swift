@@ -36,10 +36,10 @@ class LocalFeedStore {
     }
     
     func load(completion: @escaping (Result<LoadResult, Error>) -> Void) {
-        let storeURL = storeURL
-        queue.async {
+        queue.async { [weak self] in
+            guard let self = self else { return }
             do {
-                let data = try Data(contentsOf: storeURL)
+                let data = try Data(contentsOf: self.storeURL)
                 guard !data.isEmpty else {
                     completion(.success(.empty))
                     return
@@ -55,12 +55,12 @@ class LocalFeedStore {
     
     func save(data: DataRepresentation,
               completion: @escaping (Result<Void, Error>) -> Void) {
-        let storeURL = storeURL
-        queue.async(flags: .barrier) {
+        queue.async(flags: .barrier) { [weak self] in
+            guard let self = self else { return }
             do {
                 let encoder = JSONEncoder()
                 let encodedData = try encoder.encode(data)
-                try encodedData.write(to: storeURL)
+                try encodedData.write(to: self.storeURL)
                 completion(.success(()))
             } catch {
                 completion(.failure(error))
@@ -69,10 +69,10 @@ class LocalFeedStore {
     }
     
     func delete(completion: @escaping (Result<Void, Error>) -> Void) {
-        let storeURL = storeURL
-        queue.async(flags: .barrier) {
+        queue.async(flags: .barrier) { [weak self] in
+            guard let self = self else { return }
             do {
-                try Data().write(to: storeURL)
+                try Data().write(to: self.storeURL)
                 completion(.success(()))
             } catch {
                 completion(.failure(error))
@@ -216,6 +216,30 @@ class LocalFeedStoreTests: XCTestCase {
         }
         wait(for: [op1, op2, op3, op4, op5], timeout: 1)
         XCTAssertEqual(completedOperations, [op1, op2, op3, op4, op5], "expected op1, op2, op3, op4, op5 in order, got \(completedOperations) instead.")
+    }
+    
+    func test_load_doesNotCallCompletionAfterSUTDeallocated() {
+        var sut: LocalFeedStore? = LocalFeedStore(storeURL: storeURLForTest())
+        sut?.load { _ in
+            XCTFail("")
+        }
+        sut = nil
+    }
+    
+    func test_save_doesNotCallCompletionAfterSUTDeallocated() {
+        var sut: LocalFeedStore? = LocalFeedStore(storeURL: storeURLForTest())
+        sut?.save(data: anyDataRepresentation()) { _ in
+            XCTFail("")
+        }
+        sut = nil
+    }
+    
+    func test_delete_doesNotCallCompletionAfterSUTDeallocated() {
+        var sut: LocalFeedStore? = LocalFeedStore(storeURL: storeURLForTest())
+        sut?.delete { _ in
+            XCTFail("")
+        }
+        sut = nil
     }
     
     // MARK: helpers
