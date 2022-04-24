@@ -77,24 +77,16 @@
 3. Delivers result
 
 #### Empty cache from local storage course:
-1. Deletes local storage data
-2. Loads feed from remote loader
-3. Writes data to local storage
-4. Delivers data
+1. Loads feed from remote loader
+2. Writes data to local storage
+3. Delivers data
 
 #### Expired cache course:
-1. Deletes local storage data
-2. Loads feed from remote loader
-3. Writes data to local storage
-4. Delivers data
+1. Loads feed from remote loader
+2. Writes data to local storage
+3. Delivers data
 
 #### Local storage load error course:
-1. Deletes local storage data
-2. Loads feed from remote loader
-3. Writes data to local storage
-4. Delivers data
-
-#### Delete storage error course:
 1. Loads feed from remote loader
 2. Writes data to local storage
 3. Delivers data
