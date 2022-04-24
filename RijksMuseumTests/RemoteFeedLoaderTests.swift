@@ -66,6 +66,17 @@ class URLProtocolStub: URLProtocol {
 
 class RemoteFeedLoader {
     
+    let session: URLSession
+    
+    init(session: URLSession) {
+        self.session = session
+    }
+    
+    func load(from url: URL) {
+        session.dataTask(with: url) { _, _, _ in
+        }.resume()
+    }
+    
 }
 
 class RemoteFeedLoaderTests: XCTestCase {
@@ -79,12 +90,30 @@ class RemoteFeedLoaderTests: XCTestCase {
     }
     
     func test_init_doesNotRequestNetwork() {
-        _ = RemoteFeedLoader()
+        _ = makeSUT()
         var capturedRequestsCount = 0
         URLProtocolStub.observe { _ in
             capturedRequestsCount += 1
         }
         XCTAssertEqual(capturedRequestsCount, 0, "expected zero requests, got \(capturedRequestsCount) instead.")
+    }
+    
+    func test_load_requestsNetwork() throws {
+        var requestCount = 0
+        let exp = XCTestExpectation(description: "waiting for network request")
+        URLProtocolStub.observe { _ in
+            requestCount += 1
+            exp.fulfill()
+        }
+        let sut = makeSUT()
+        sut.load(from: URL(string: "https://any-url.com")!)
+        wait(for: [exp], timeout: 1)
+        XCTAssertEqual(requestCount, 1, "not expecting requests on init. got \(requestCount).")
+    }
+    
+    // MARK: helpers
+    func makeSUT() -> RemoteFeedLoader {
+        return RemoteFeedLoader(session: .shared)
     }
 
 
