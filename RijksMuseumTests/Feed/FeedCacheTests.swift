@@ -166,14 +166,6 @@ class FeedCache {
 
 
 class FeedCacheTests: XCTestCase {
-
-    override func setUpWithError() throws {
-        URLProtocolStub.startIntercepting()
-    }
-
-    override func tearDownWithError() throws {
-        URLProtocolStub.stopIntercepting()
-    }
     
     func test_init_doesNotMessageStoreAndNetwork() {
         let (_, storeSpy, loaderSpy) = makeSUT()
@@ -452,6 +444,164 @@ class FeedCacheTests: XCTestCase {
         spy.completeDelete(withResult: .failure(anyNSError()))
         loaderSpy.completeLoad(withResult: .success(expectedItems))
         expect(spy, toRecieve: [.load, .delete, .save(expectedData)])
+    }
+    
+    // MARK: -load delivers data on load result
+    
+    func test_load_deliversDataOnStoreLoadErrorAndSuccessfulDeleteAndLoaderResultAndWriteError() {
+        let expectedItems = [anyFeedItem()]
+        let (sut, spy, loaderSpy) = makeSUT()
+        expect(sut, toCompleteLoadWith: .success(expectedItems)) {
+            spy.completeLoad(withResult: .failure(anyNSError()))
+            spy.completeDelete(withResult: .success(()))
+            loaderSpy.completeLoad(withResult: .success(expectedItems))
+            spy.completeSave(withResult: .failure(anyNSError()))
+        }
+    }
+    
+    func test_load_deliversDataOnStoreLoadErrorAndSuccessfulDeleteAndLoaderResultAndSuccessfulWrite() {
+        let expectedItems = [anyFeedItem()]
+        let (sut, spy, loaderSpy) = makeSUT()
+        expect(sut, toCompleteLoadWith: .success(expectedItems)) {
+            spy.completeLoad(withResult: .failure(anyNSError()))
+            spy.completeDelete(withResult: .success(()))
+            loaderSpy.completeLoad(withResult: .success(expectedItems))
+            spy.completeSave(withResult: .success(()))
+        }
+    }
+    
+    func test_load_deliversDataOnStoreLoadErrorAndDeleteErrorAndLoaderResultAndWriteError() {
+        let expectedItems = [anyFeedItem()]
+        let (sut, spy, loaderSpy) = makeSUT()
+        expect(sut, toCompleteLoadWith: .success(expectedItems)) {
+            spy.completeLoad(withResult: .failure(anyNSError()))
+            spy.completeDelete(withResult: .failure(anyNSError()))
+            loaderSpy.completeLoad(withResult: .success(expectedItems))
+            spy.completeSave(withResult: .failure(anyNSError()))
+        }
+    }
+    
+    func test_load_deliversDataOnStoreLoadErrorAndDeleteErrorAndLoaderResultAndSuccessfulWrite() {
+        let expectedItems = [anyFeedItem()]
+        let (sut, spy, loaderSpy) = makeSUT()
+        expect(sut, toCompleteLoadWith: .success(expectedItems)) {
+            spy.completeLoad(withResult: .failure(anyNSError()))
+            spy.completeDelete(withResult: .failure(anyNSError()))
+            loaderSpy.completeLoad(withResult: .success(expectedItems))
+            spy.completeSave(withResult: .success(()))
+        }
+    }
+    
+    func test_load_deliversDataOnEmptyCacheAndDeleteErrorAndLoaderResultAndWriteError() {
+        let expectedItems = [anyFeedItem()]
+        let (sut, spy, loaderSpy) = makeSUT()
+        expect(sut, toCompleteLoadWith: .success(expectedItems)) {
+            spy.completeLoad(withResult: .success(.empty))
+            spy.completeDelete(withResult: .failure(anyNSError()))
+            loaderSpy.completeLoad(withResult: .success(expectedItems))
+            spy.completeSave(withResult: .failure(anyNSError()))
+        }
+    }
+    
+    func test_load_deliversDataOnEmptyCacheAndDeleteErrorAndLoaderResultAndSuccessfulWrite() {
+        let expectedItems = [anyFeedItem()]
+        let (sut, spy, loaderSpy) = makeSUT()
+        expect(sut, toCompleteLoadWith: .success(expectedItems)) {
+            spy.completeLoad(withResult: .success(.empty))
+            spy.completeDelete(withResult: .failure(anyNSError()))
+            loaderSpy.completeLoad(withResult: .success(expectedItems))
+            spy.completeSave(withResult: .success(()))
+        }
+    }
+    
+    func test_load_deliversDataOnEmptyCacheAndSuccessfulDeleteAndLoaderResultAndWriteError() {
+        let expectedItems = [anyFeedItem()]
+        let (sut, spy, loaderSpy) = makeSUT()
+        expect(sut, toCompleteLoadWith: .success(expectedItems)) {
+            spy.completeLoad(withResult: .success(.empty))
+            spy.completeDelete(withResult: .success(()))
+            loaderSpy.completeLoad(withResult: .success(expectedItems))
+            spy.completeSave(withResult: .failure(anyNSError()))
+        }
+    }
+    
+    func test_load_deliversDataOnEmptyCacheAndSuccessfulDeleteAndLoaderResultAndSuccessfulWrite() {
+        let expectedItems = [anyFeedItem()]
+        let (sut, spy, loaderSpy) = makeSUT()
+        expect(sut, toCompleteLoadWith: .success(expectedItems)) {
+            spy.completeLoad(withResult: .success(.empty))
+            spy.completeDelete(withResult: .success(()))
+            loaderSpy.completeLoad(withResult: .success(expectedItems))
+            spy.completeSave(withResult: .success(()))
+        }
+    }
+    
+    func test_load_deliversDataOnExpiredCacheAndDeleteErrorAndLoaderResultAndWriteError() {
+        let cacheAge = testCacheMaxAge()
+        let fixedCurrentDate = Date()
+        let expectedItems = [anyFeedItem()]
+        let (sut, spy, loaderSpy) = makeSUT(maxAge: cacheAge, currentDate: { fixedCurrentDate })
+        let expiredCacheTimetamp = fixedCurrentDate
+            .addingTimeInterval(-cacheAge)
+            .addingTimeInterval(-1)
+        let expiredData = FeedStore.DataRepresentation(feed: [anyFeedItem()], timestamp: expiredCacheTimetamp)
+        expect(sut, toCompleteLoadWith: .success(expectedItems)) {
+            spy.completeLoad(withResult: .success(.result(expiredData)))
+            spy.completeDelete(withResult: .failure(anyNSError()))
+            loaderSpy.completeLoad(withResult: .success(expectedItems))
+            spy.completeSave(withResult: .failure(anyNSError()))
+        }
+    }
+    
+    func test_load_deliversDataOnExpiredCacheAndDeleteErrorAndLoaderResultAndSuccessfulWrite() {
+        let cacheAge = testCacheMaxAge()
+        let fixedCurrentDate = Date()
+        let expectedItems = [anyFeedItem()]
+        let (sut, spy, loaderSpy) = makeSUT(maxAge: cacheAge, currentDate: { fixedCurrentDate })
+        let expiredCacheTimetamp = fixedCurrentDate
+            .addingTimeInterval(-cacheAge)
+            .addingTimeInterval(-1)
+        let expiredData = FeedStore.DataRepresentation(feed: [anyFeedItem()], timestamp: expiredCacheTimetamp)
+        expect(sut, toCompleteLoadWith: .success(expectedItems)) {
+            spy.completeLoad(withResult: .success(.result(expiredData)))
+            spy.completeDelete(withResult: .failure(anyNSError()))
+            loaderSpy.completeLoad(withResult: .success(expectedItems))
+            spy.completeSave(withResult: .success(()))
+        }
+    }
+    
+    func test_load_deliversDataOnExpiredCacheAndSuccessfulDeleteAndLoaderResultAndWriteError() {
+        let cacheAge = testCacheMaxAge()
+        let fixedCurrentDate = Date()
+        let expectedItems = [anyFeedItem()]
+        let (sut, spy, loaderSpy) = makeSUT(maxAge: cacheAge, currentDate: { fixedCurrentDate })
+        let expiredCacheTimetamp = fixedCurrentDate
+            .addingTimeInterval(-cacheAge)
+            .addingTimeInterval(-1)
+        let expiredData = FeedStore.DataRepresentation(feed: [anyFeedItem()], timestamp: expiredCacheTimetamp)
+        expect(sut, toCompleteLoadWith: .success(expectedItems)) {
+            spy.completeLoad(withResult: .success(.result(expiredData)))
+            spy.completeDelete(withResult: .success(()))
+            loaderSpy.completeLoad(withResult: .success(expectedItems))
+            spy.completeSave(withResult: .failure(anyNSError()))
+        }
+    }
+    
+    func test_load_deliversDataOnExpiredCacheAndSuccessfulDeleteAndLoaderResultAndSuccessfulWrite() {
+        let cacheAge = testCacheMaxAge()
+        let fixedCurrentDate = Date()
+        let expectedItems = [anyFeedItem()]
+        let (sut, spy, loaderSpy) = makeSUT(maxAge: cacheAge, currentDate: { fixedCurrentDate })
+        let expiredCacheTimetamp = fixedCurrentDate
+            .addingTimeInterval(-cacheAge)
+            .addingTimeInterval(-1)
+        let expiredData = FeedStore.DataRepresentation(feed: [anyFeedItem()], timestamp: expiredCacheTimetamp)
+        expect(sut, toCompleteLoadWith: .success(expectedItems)) {
+            spy.completeLoad(withResult: .success(.result(expiredData)))
+            spy.completeDelete(withResult: .success(()))
+            loaderSpy.completeLoad(withResult: .success(expectedItems))
+            spy.completeSave(withResult: .success(()))
+        }
     }
     
     // MARK: -helpers
