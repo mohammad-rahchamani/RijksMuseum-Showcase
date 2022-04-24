@@ -8,81 +8,6 @@
 import XCTest
 import RijksMuseum
 
-class LocalFeedStore {
-    
-    struct DataRepresentation: Equatable, Codable {
-        let feed: [FeedItem]
-        let timestamp: Date
-    }
-    
-    enum LoadResult: Equatable {
-        case empty
-        case result(DataRepresentation)
-    }
-    
-    private let storeURL: URL
-    private let queue = DispatchQueue(label: "\(type(of: LocalFeedStore.self))",
-                                      qos: .background,
-                                      attributes: .concurrent)
-    
-    init(storeURL: URL) {
-        self.storeURL = storeURL
-        self.setupStore()
-    }
-    
-    private func setupStore() {
-        guard !FileManager.default.fileExists(atPath: storeURL.path) else { return }
-        try? "".data(using: .utf8)?.write(to: storeURL)
-    }
-    
-    func load(completion: @escaping (Result<LoadResult, Error>) -> Void) {
-        queue.async { [weak self] in
-            guard let self = self else { return }
-            do {
-                let data = try Data(contentsOf: self.storeURL)
-                guard !data.isEmpty else {
-                    completion(.success(.empty))
-                    return
-                }
-                let decoder = JSONDecoder()
-                let parsedData = try decoder.decode(DataRepresentation.self, from: data)
-                completion(.success(.result(parsedData)))
-            } catch {
-                completion(.failure(error))
-            }
-        }
-    }
-    
-    func save(data: DataRepresentation,
-              completion: @escaping (Result<Void, Error>) -> Void) {
-        queue.async(flags: .barrier) { [weak self] in
-            guard let self = self else { return }
-            do {
-                let encoder = JSONEncoder()
-                let encodedData = try encoder.encode(data)
-                try encodedData.write(to: self.storeURL)
-                completion(.success(()))
-            } catch {
-                completion(.failure(error))
-            }
-        }
-    }
-    
-    func delete(completion: @escaping (Result<Void, Error>) -> Void) {
-        queue.async(flags: .barrier) { [weak self] in
-            guard let self = self else { return }
-            do {
-                try Data().write(to: self.storeURL)
-                completion(.success(()))
-            } catch {
-                completion(.failure(error))
-            }
-        }
-    }
-    
-    
-}
-
 class LocalFeedStoreTests: XCTestCase {
 
     override func setUpWithError() throws {
@@ -145,16 +70,14 @@ class LocalFeedStoreTests: XCTestCase {
     
     func test_save_writesDataToStore() {
         let sut = makeSUT(storeURL: storeURLForTest())
-        let feed = [anyFeedItem(), anyFeedItem(), anyFeedItem()]
-        let timestamp = Date()
-        let expectedResult = LocalFeedStore.DataRepresentation(feed: feed, timestamp: timestamp)
+        let expectedResult = anyDataRepresentation()
         save(expectedResult, to: sut)
         expect(sut, toCompleteLoadWith: .success(.result(expectedResult)))
     }
     
     func test_save_overridesDataOnStoreWithValue() {
         let sut = makeSUT(storeURL: storeURLForTest())
-        let sampleData = LocalFeedStore.DataRepresentation(feed: [anyFeedItem()], timestamp: Date())
+        let sampleData = anyDataRepresentation()
         let expectedResult = LocalFeedStore.DataRepresentation(feed: [anyFeedItem(), anyFeedItem()],
                                                                timestamp: Date())
         save(sampleData, to: sut)
@@ -180,7 +103,7 @@ class LocalFeedStoreTests: XCTestCase {
     
     func test_delete_removesDataFromStoreWithData() {
         let sut = makeSUT(storeURL: storeURLForTest())
-        let data = LocalFeedStore.DataRepresentation(feed: [anyFeedItem()], timestamp: Date())
+        let data = anyDataRepresentation()
         save(data, to: sut)
         delete(sut)
         expect(sut, toCompleteLoadWith: .success(.empty))
