@@ -19,6 +19,52 @@
 #### Error course - decode error
 1. Delivers Error
 
+-------------
+
+### Load From Local Feed Store Use Case
+
+#### Primary course:
+1. Reads data from the given URL
+2. Validates data
+3. Creates a list of feed items and a timestamp
+4. Delivers feed items and timestamp
+
+#### Error course - store error (invalid url, ...)
+1. Delivers Error
+
+#### Error course - decode error
+1. Delivers Error
+
+-------------
+
+### Delete Local Feed Store Use Case
+
+#### Primary course:
+1. Finishes successfully
+
+#### Error course
+1. Delivers error
+
+-------------
+
+### Save To Local Feed Store Use Case
+
+#### Data:
+- [FeedItem]
+- Date
+
+#### Primary course:
+1. Encodes feed items and timestamp to json
+2. Writes json data into store
+3. Finishes successfully
+
+#### Error course - store error (invalid url, ...)
+1. Delivers error
+
+#### Error course - encode error
+1. Delivers error
+
+-------------
 
 ### Payload Contract
 
