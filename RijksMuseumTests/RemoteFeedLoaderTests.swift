@@ -113,7 +113,8 @@ class RemoteFeedLoader {
     
     func load(from url: URL,
               completion: @escaping (Result<[FeedItem], Error>) -> Void) {
-        session.dataTask(with: url) { data, response, error in
+        session.dataTask(with: url) { [weak self] data, response, error in
+            guard let self = self else { return }
             if let error = error {
                 completion(.failure(error))
                 return
@@ -300,9 +301,24 @@ class RemoteFeedLoaderTests: XCTestCase {
         expect(sut, toCompleteWithResult: .success(items))
     }
     
+    func test_load_doesNotCallCompletionAfterLoaderDeallocated() {
+        var sut: RemoteFeedLoader? = RemoteFeedLoader(session: .shared)
+        URLProtocolStub.stub(withData: getData(from: [anyFeedItem()]),
+                             response: httpResponse(withCode: 200),
+                             error: nil)
+        sut?.load(from: anyURL()) { _ in
+            XCTFail("completion should not be called.")
+        }
+        sut = nil
+    }
+    
     // MARK: helpers
-    func makeSUT() -> RemoteFeedLoader {
-        return RemoteFeedLoader(session: .shared)
+    func makeSUT(file: StaticString = #file, line: UInt = #line) -> RemoteFeedLoader {
+        let sut = RemoteFeedLoader(session: .shared)
+        addTeardownBlock { [weak sut] in
+            XCTAssertNil(sut, "instance should be nil", file: file, line: line)
+        }
+        return sut
     }
     
     func expect(_ sut: RemoteFeedLoader,
