@@ -44,6 +44,7 @@
 		B5609C1F281554BC004F6D2D /* RijksMuseumUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RijksMuseumUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		B5609C23281554BC004F6D2D /* RijksMuseumUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RijksMuseumUITests.swift; sourceTree = "<group>"; };
 		B5609C25281554BC004F6D2D /* RijksMuseumUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RijksMuseumUITestsLaunchTests.swift; sourceTree = "<group>"; };
+		B5609C32281554ED004F6D2D /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -74,6 +75,7 @@
 		B5609BFC281554B9004F6D2D = {
 			isa = PBXGroup;
 			children = (
+				B5609C32281554ED004F6D2D /* README.md */,
 				B5609C07281554B9004F6D2D /* RijksMuseum */,
 				B5609C18281554BC004F6D2D /* RijksMuseumTests */,
 				B5609C22281554BC004F6D2D /* RijksMuseumUITests */,
