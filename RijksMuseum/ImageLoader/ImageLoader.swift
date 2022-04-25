@@ -8,7 +8,11 @@
 import Foundation
 import UIKit
 
-public class ImageLoader {
+public protocol ImageLoaderProtocol {
+    func load(from url: URL, completion: @escaping (Result<Data, Error>) -> Void)
+}
+
+public class ImageLoader: ImageLoaderProtocol {
     
     private let cache: URLCache
     private let session: URLSession
@@ -32,11 +36,12 @@ public class ImageLoader {
     
     private func loadFrom(_ url: URL,
                           completion: @escaping (Result<Data, Error>) -> Void) {
-        session.dataTask(with: url) { [weak self] (data, response, error) in
+        session.downloadTask(with: url) { [weak self] (localURL, response, error) in
             guard let self = self else { return }
             if let httpResponse = response as? HTTPURLResponse,
-               let data = data,
+               let localURL = localURL,
                self.isValid(httpResponse),
+               let data = try? Data(contentsOf: localURL),
                self.isValid(data) {
                 self.cache.storeCachedResponse(CachedURLResponse(response: response!,
                                                                  data: data),
@@ -49,7 +54,7 @@ public class ImageLoader {
     }
     
     private func isValid(_ data: Data) -> Bool {
-        guard let _ = UIImage(data: data) else { return false}
+        guard let _ = UIImage(data: data) else { return false }
         return true
     }
     
