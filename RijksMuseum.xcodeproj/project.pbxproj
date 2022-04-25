@@ -22,6 +22,7 @@
 		B50224B628165791009F3267 /* FeedLoaderStub.swift in Sources */ = {isa = PBXBuildFile; fileRef = B50224B528165791009F3267 /* FeedLoaderStub.swift */; };
 		B50224B928165B8D009F3267 /* MainThreadDecorator.swift in Sources */ = {isa = PBXBuildFile; fileRef = B50224B828165B8D009F3267 /* MainThreadDecorator.swift */; };
 		B50224BC28166332009F3267 /* ItemDetailsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B50224BB28166332009F3267 /* ItemDetailsView.swift */; };
+		B50224BE2816652C009F3267 /* LazyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B50224BD2816652C009F3267 /* LazyView.swift */; };
 		B506AC872815742E00002A8E /* FeedImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = B506AC862815742E00002A8E /* FeedImage.swift */; };
 		B506AC892815745600002A8E /* FeedItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = B506AC882815745600002A8E /* FeedItem.swift */; };
 		B506AC8C281574AB00002A8E /* URLProtocolStub.swift in Sources */ = {isa = PBXBuildFile; fileRef = B506AC8B281574AB00002A8E /* URLProtocolStub.swift */; };
@@ -76,6 +77,7 @@
 		B50224B528165791009F3267 /* FeedLoaderStub.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedLoaderStub.swift; sourceTree = "<group>"; };
 		B50224B828165B8D009F3267 /* MainThreadDecorator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainThreadDecorator.swift; sourceTree = "<group>"; };
 		B50224BB28166332009F3267 /* ItemDetailsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ItemDetailsView.swift; sourceTree = "<group>"; };
+		B50224BD2816652C009F3267 /* LazyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LazyView.swift; sourceTree = "<group>"; };
 		B506AC862815742E00002A8E /* FeedImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedImage.swift; sourceTree = "<group>"; };
 		B506AC882815745600002A8E /* FeedItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedItem.swift; sourceTree = "<group>"; };
 		B506AC8B281574AB00002A8E /* URLProtocolStub.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLProtocolStub.swift; sourceTree = "<group>"; };
@@ -164,6 +166,7 @@
 			isa = PBXGroup;
 			children = (
 				B50224AC2816538F009F3267 /* DynamicImage */,
+				B50224BD2816652C009F3267 /* LazyView.swift */,
 			);
 			path = Component;
 			sourceTree = "<group>";
@@ -502,6 +505,7 @@
 				B50224B628165791009F3267 /* FeedLoaderStub.swift in Sources */,
 				B506AC872815742E00002A8E /* FeedImage.swift in Sources */,
 				B506AC9E2815AED500002A8E /* FeedStoreDataRepresentation.swift in Sources */,
+				B50224BE2816652C009F3267 /* LazyView.swift in Sources */,
 				B506AC972815AAD500002A8E /* LocalFeedStore.swift in Sources */,
 				B506ACA22815CB4600002A8E /* FeedLoader.swift in Sources */,
 				B506ACA02815AEF100002A8E /* FeedStoreResult.swift in Sources */,
