@@ -35,9 +35,7 @@ class DynamicImageViewModel: ObservableObject {
     }
     
     private func map(_ data: Data) {
-        print("DYN MAP")
         self.imageMapper.map(data: data) { [weak self] result in
-            print("DYN MAP Done")
             guard let self = self else { return }
             switch result {
             case .failure:
