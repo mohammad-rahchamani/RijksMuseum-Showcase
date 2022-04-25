@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct FeedImage: Equatable, Codable {
+public struct FeedImage: Equatable, Hashable, Codable {
     public let guid: String
     public let url: String
     

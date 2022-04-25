@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct FeedItem: Identifiable, Equatable, Codable {
+public struct FeedItem: Identifiable, Equatable, Hashable, Codable {
     
     public let id: String
     public let objectNumber: String
