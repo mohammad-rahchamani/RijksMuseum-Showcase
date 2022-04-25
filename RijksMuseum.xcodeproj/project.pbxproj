@@ -17,6 +17,9 @@
 		B50224A92816533B009F3267 /* ImageMapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = B50224A82816533B009F3267 /* ImageMapper.swift */; };
 		B50224AB28165363009F3267 /* SimpleImageMapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = B50224AA28165363009F3267 /* SimpleImageMapper.swift */; };
 		B50224AE281653A5009F3267 /* DynamicImageViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B50224AD281653A4009F3267 /* DynamicImageViewModel.swift */; };
+		B50224B2281656E3009F3267 /* FeedListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B50224B1281656E3009F3267 /* FeedListView.swift */; };
+		B50224B428165751009F3267 /* FeedListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B50224B328165751009F3267 /* FeedListViewModel.swift */; };
+		B50224B628165791009F3267 /* FeedLoaderStub.swift in Sources */ = {isa = PBXBuildFile; fileRef = B50224B528165791009F3267 /* FeedLoaderStub.swift */; };
 		B506AC872815742E00002A8E /* FeedImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = B506AC862815742E00002A8E /* FeedImage.swift */; };
 		B506AC892815745600002A8E /* FeedItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = B506AC882815745600002A8E /* FeedItem.swift */; };
 		B506AC8C281574AB00002A8E /* URLProtocolStub.swift in Sources */ = {isa = PBXBuildFile; fileRef = B506AC8B281574AB00002A8E /* URLProtocolStub.swift */; };
@@ -66,6 +69,9 @@
 		B50224A82816533B009F3267 /* ImageMapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageMapper.swift; sourceTree = "<group>"; };
 		B50224AA28165363009F3267 /* SimpleImageMapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimpleImageMapper.swift; sourceTree = "<group>"; };
 		B50224AD281653A4009F3267 /* DynamicImageViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DynamicImageViewModel.swift; sourceTree = "<group>"; };
+		B50224B1281656E3009F3267 /* FeedListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedListView.swift; sourceTree = "<group>"; };
+		B50224B328165751009F3267 /* FeedListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedListViewModel.swift; sourceTree = "<group>"; };
+		B50224B528165791009F3267 /* FeedLoaderStub.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedLoaderStub.swift; sourceTree = "<group>"; };
 		B506AC862815742E00002A8E /* FeedImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedImage.swift; sourceTree = "<group>"; };
 		B506AC882815745600002A8E /* FeedItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedItem.swift; sourceTree = "<group>"; };
 		B506AC8B281574AB00002A8E /* URLProtocolStub.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLProtocolStub.swift; sourceTree = "<group>"; };
@@ -176,6 +182,23 @@
 			path = DynamicImage;
 			sourceTree = "<group>";
 		};
+		B50224AF281656B1009F3267 /* UI */ = {
+			isa = PBXGroup;
+			children = (
+				B50224B0281656B7009F3267 /* FeedListView */,
+			);
+			path = UI;
+			sourceTree = "<group>";
+		};
+		B50224B0281656B7009F3267 /* FeedListView */ = {
+			isa = PBXGroup;
+			children = (
+				B50224B1281656E3009F3267 /* FeedListView.swift */,
+				B50224B328165751009F3267 /* FeedListViewModel.swift */,
+			);
+			path = FeedListView;
+			sourceTree = "<group>";
+		};
 		B506AC84281573F600002A8E /* Feed */ = {
 			isa = PBXGroup;
 			children = (
@@ -211,6 +234,7 @@
 			children = (
 				B506AC8E281574DD00002A8E /* RemoteFeedLoader.swift */,
 				B506ACA12815CB4600002A8E /* FeedLoader.swift */,
+				B50224B528165791009F3267 /* FeedLoaderStub.swift */,
 			);
 			path = Loader;
 			sourceTree = "<group>";
@@ -269,6 +293,7 @@
 		B5609C07281554B9004F6D2D /* RijksMuseum */ = {
 			isa = PBXGroup;
 			children = (
+				B50224AF281656B1009F3267 /* UI */,
 				B50224A428164DB0009F3267 /* Component */,
 				B50224962816336F009F3267 /* ImageLoader */,
 				B506AC84281573F600002A8E /* Feed */,
@@ -440,14 +465,17 @@
 				B506AC892815745600002A8E /* FeedItem.swift in Sources */,
 				B5609C0B281554B9004F6D2D /* ContentView.swift in Sources */,
 				B50224A92816533B009F3267 /* ImageMapper.swift in Sources */,
+				B50224B2281656E3009F3267 /* FeedListView.swift in Sources */,
 				B50224A628164DC5009F3267 /* DynamicImageView.swift in Sources */,
 				B50224982816337B009F3267 /* ImageLoader.swift in Sources */,
 				B5609C09281554B9004F6D2D /* RijksMuseumApp.swift in Sources */,
 				B50224902816119F009F3267 /* FeedCache.swift in Sources */,
 				B50224AB28165363009F3267 /* SimpleImageMapper.swift in Sources */,
 				B506AC8F281574DD00002A8E /* RemoteFeedLoader.swift in Sources */,
+				B50224B428165751009F3267 /* FeedListViewModel.swift in Sources */,
 				B506AC9B2815AD7000002A8E /* FeedStore.swift in Sources */,
 				B50224AE281653A5009F3267 /* DynamicImageViewModel.swift in Sources */,
+				B50224B628165791009F3267 /* FeedLoaderStub.swift in Sources */,
 				B506AC872815742E00002A8E /* FeedImage.swift in Sources */,
 				B506AC9E2815AED500002A8E /* FeedStoreDataRepresentation.swift in Sources */,
 				B506AC972815AAD500002A8E /* LocalFeedStore.swift in Sources */,
