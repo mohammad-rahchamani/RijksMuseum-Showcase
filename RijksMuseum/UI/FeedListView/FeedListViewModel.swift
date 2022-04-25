@@ -12,7 +12,7 @@ class FeedListViewModel: ObservableObject {
     @Published var isLoading: Bool = false
     @Published var feed: [FeedItem] = []
     @Published var loadFailed: Bool = false
-    @Published var selectedItemId: String? = nil
+    @Published var selectedItem: FeedItem? = nil
     
     private let loader: FeedLoader
     
@@ -23,7 +23,8 @@ class FeedListViewModel: ObservableObject {
     func load() {
         self.loadFailed = false
         self.isLoading = true
-        self.loader.load { result in
+        self.loader.load { [weak self] result in
+            guard let self = self else { return }
             self.isLoading = false
             switch result {
             case .success(let items):

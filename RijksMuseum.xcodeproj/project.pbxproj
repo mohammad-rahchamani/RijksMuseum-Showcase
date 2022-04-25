@@ -23,6 +23,8 @@
 		B50224B928165B8D009F3267 /* MainThreadDecorator.swift in Sources */ = {isa = PBXBuildFile; fileRef = B50224B828165B8D009F3267 /* MainThreadDecorator.swift */; };
 		B50224BC28166332009F3267 /* ItemDetailsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B50224BB28166332009F3267 /* ItemDetailsView.swift */; };
 		B50224BE2816652C009F3267 /* LazyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B50224BD2816652C009F3267 /* LazyView.swift */; };
+		B50224C028166C1F009F3267 /* FeedListUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B50224BF28166C1F009F3267 /* FeedListUITests.swift */; };
+		B50224C328167974009F3267 /* FeedListViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B50224C228167974009F3267 /* FeedListViewModelTests.swift */; };
 		B506AC872815742E00002A8E /* FeedImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = B506AC862815742E00002A8E /* FeedImage.swift */; };
 		B506AC892815745600002A8E /* FeedItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = B506AC882815745600002A8E /* FeedItem.swift */; };
 		B506AC8C281574AB00002A8E /* URLProtocolStub.swift in Sources */ = {isa = PBXBuildFile; fileRef = B506AC8B281574AB00002A8E /* URLProtocolStub.swift */; };
@@ -78,6 +80,8 @@
 		B50224B828165B8D009F3267 /* MainThreadDecorator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainThreadDecorator.swift; sourceTree = "<group>"; };
 		B50224BB28166332009F3267 /* ItemDetailsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ItemDetailsView.swift; sourceTree = "<group>"; };
 		B50224BD2816652C009F3267 /* LazyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LazyView.swift; sourceTree = "<group>"; };
+		B50224BF28166C1F009F3267 /* FeedListUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedListUITests.swift; sourceTree = "<group>"; };
+		B50224C228167974009F3267 /* FeedListViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedListViewModelTests.swift; sourceTree = "<group>"; };
 		B506AC862815742E00002A8E /* FeedImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedImage.swift; sourceTree = "<group>"; };
 		B506AC882815745600002A8E /* FeedItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedItem.swift; sourceTree = "<group>"; };
 		B506AC8B281574AB00002A8E /* URLProtocolStub.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLProtocolStub.swift; sourceTree = "<group>"; };
@@ -223,6 +227,14 @@
 			path = ItemDetailsView;
 			sourceTree = "<group>";
 		};
+		B50224C12816795F009F3267 /* UI */ = {
+			isa = PBXGroup;
+			children = (
+				B50224C228167974009F3267 /* FeedListViewModelTests.swift */,
+			);
+			path = UI;
+			sourceTree = "<group>";
+		};
 		B506AC84281573F600002A8E /* Feed */ = {
 			isa = PBXGroup;
 			children = (
@@ -341,6 +353,7 @@
 		B5609C18281554BC004F6D2D /* RijksMuseumTests */ = {
 			isa = PBXGroup;
 			children = (
+				B50224C12816795F009F3267 /* UI */,
 				B50224992816339F009F3267 /* ImageLoader */,
 				B506AC90281575AD00002A8E /* Feed */,
 				B506AC8A2815749800002A8E /* Helper */,
@@ -353,6 +366,7 @@
 			children = (
 				B5609C23281554BC004F6D2D /* RijksMuseumUITests.swift */,
 				B5609C25281554BC004F6D2D /* RijksMuseumUITestsLaunchTests.swift */,
+				B50224BF28166C1F009F3267 /* FeedListUITests.swift */,
 			);
 			path = RijksMuseumUITests;
 			sourceTree = "<group>";
@@ -518,6 +532,7 @@
 			files = (
 				B506AC9428157E6000002A8E /* XCTestCase+Extension.swift in Sources */,
 				B5609C3428155514004F6D2D /* RemoteFeedLoaderTests.swift in Sources */,
+				B50224C328167974009F3267 /* FeedListViewModelTests.swift in Sources */,
 				B502248E28161164009F3267 /* FeedLoaderSpy.swift in Sources */,
 				B502248B2816111E009F3267 /* FeedStoreSpy.swift in Sources */,
 				B506AC992815AC8400002A8E /* FeedCacheTests.swift in Sources */,
@@ -533,6 +548,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				B5609C26281554BC004F6D2D /* RijksMuseumUITestsLaunchTests.swift in Sources */,
+				B50224C028166C1F009F3267 /* FeedListUITests.swift in Sources */,
 				B5609C24281554BC004F6D2D /* RijksMuseumUITests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
