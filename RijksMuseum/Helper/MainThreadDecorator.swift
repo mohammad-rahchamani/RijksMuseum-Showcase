@@ -25,3 +25,16 @@ class MainThreadDecorator<T> {
         action()
     }
 }
+
+extension MainThreadDecorator: FeedLoader where T == FeedLoader {
+    
+    func load(completion: @escaping (Result<[FeedItem], Error>) -> Void) {
+        decoratee.load { [weak self] result in
+            guard let self = self else { return }
+            self.runOnMainThread {
+                completion(result)
+            }
+        }
+    }
+    
+}
