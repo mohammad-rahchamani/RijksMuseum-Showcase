@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import UIKit
 
 class MainThreadDecorator<T> {
     let decoratee: T
@@ -30,6 +31,19 @@ extension MainThreadDecorator: FeedLoader where T == FeedLoader {
     
     func load(completion: @escaping (Result<[FeedItem], Error>) -> Void) {
         decoratee.load { [weak self] result in
+            guard let self = self else { return }
+            self.runOnMainThread {
+                completion(result)
+            }
+        }
+    }
+    
+}
+
+extension MainThreadDecorator: ImageMapper where T == ImageMapper {
+    
+    func map(data: Data, completion: @escaping (Result<UIImage, Error>) -> Void) {
+        decoratee.map(data: data) { [weak self] result in
             guard let self = self else { return }
             self.runOnMainThread {
                 completion(result)
