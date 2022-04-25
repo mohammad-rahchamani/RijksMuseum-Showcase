@@ -14,13 +14,15 @@ class DynamicImageViewModel: ObservableObject {
     
     private let imageLoader: ImageLoader
     private let imageMapper: ImageMapper
+    private let url: URL
     
-    init(loader: ImageLoader, mapper: ImageMapper) {
+    init(loader: ImageLoader, mapper: ImageMapper, url: URL) {
         self.imageLoader = loader
         self.imageMapper = mapper
+        self.url = url
     }
     
-    func load(from url: URL) {
+    func load() {
         imageLoader.load(from: url) { [weak self] result in
             guard let self = self else { return }
             switch result {
@@ -33,7 +35,9 @@ class DynamicImageViewModel: ObservableObject {
     }
     
     private func map(_ data: Data) {
+        print("DYN MAP")
         self.imageMapper.map(data: data) { [weak self] result in
+            print("DYN MAP Done")
             guard let self = self else { return }
             switch result {
             case .failure:
@@ -49,6 +53,7 @@ class DynamicImageViewModel: ObservableObject {
 extension DynamicImageViewModel {
     static var preview: DynamicImageViewModel {
         DynamicImageViewModel(loader: ImageLoader(cache: URLCache()),
-                              mapper: SimpleImageMapper())
+                              mapper: SimpleImageMapper(),
+                              url: URL(string: "https://any-url.com")!)
     }
 }
