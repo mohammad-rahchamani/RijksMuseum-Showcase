@@ -8,33 +8,33 @@
 import Foundation
 import UIKit
 
-class DynamicImageViewModel: ObservableObject {
+public class DynamicImageViewModel: ObservableObject {
     
-    @Published var image: UIImage?
+    @Published public var image: UIImage?
     
-    private let imageLoader: ImageLoader
+    private let imageLoader: ImageLoaderProtocol
     private let imageMapper: ImageMapper
     private let url: URL
     
-    init(loader: ImageLoader, mapper: ImageMapper, url: URL) {
+    public init(loader: ImageLoaderProtocol, mapper: ImageMapper, url: URL) {
         self.imageLoader = loader
         self.imageMapper = mapper
         self.url = url
     }
     
-    func load() {
+    public func load(completion: @escaping () -> () = { }) {
         imageLoader.load(from: url) { [weak self] result in
             guard let self = self else { return }
             switch result {
             case .failure:
-                ()
+                completion()
             case .success(let imageData):
-                self.map(imageData)
+                self.map(imageData, completion: completion)
             }
         }
     }
     
-    private func map(_ data: Data) {
+    private func map(_ data: Data, completion: @escaping () -> ()) {
         self.imageMapper.map(data: data) { [weak self] result in
             guard let self = self else { return }
             switch result {
@@ -43,6 +43,7 @@ class DynamicImageViewModel: ObservableObject {
             case .success(let image):
                 self.image = image
             }
+            completion()
         }
     }
     
