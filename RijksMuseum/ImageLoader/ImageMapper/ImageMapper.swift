@@ -6,3 +6,8 @@
 //
 
 import Foundation
+import UIKit
+
+protocol ImageMapper {
+    func map(data: Data, completion: @escaping (Result<UIImage, Error>) -> Void)
+}
