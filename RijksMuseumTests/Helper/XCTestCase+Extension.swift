@@ -6,6 +6,7 @@
 //
 
 import XCTest
+import UIKit
 import RijksMuseum
 
 public extension XCTestCase {
@@ -51,6 +52,10 @@ public extension XCTestCase {
                         statusCode: code,
                         httpVersion: nil,
                         headerFields: nil)!
+    }
+    
+    func anyUIImage() -> UIImage {
+        UIImage(systemName: "trash")!
     }
 }
 
