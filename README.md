@@ -97,6 +97,25 @@
 #### Write to local storage error course:
 1. Delivers data
 
+-------------
+
+### Load Image From Network Use Case
+
+#### Data:
+- URL
+
+#### Load image from cache course:
+1. Checks cache for data
+2. Delivers image
+
+#### Load image from network course:
+1. Checks cache for data
+2. Requests data from network
+3. Caches data
+4. Delivers image
+
+#### Error course - network error, invalid response, ...
+1. Delivers Error
 
 ### Payload Contract
 
