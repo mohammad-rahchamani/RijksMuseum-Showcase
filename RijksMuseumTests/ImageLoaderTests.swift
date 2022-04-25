@@ -65,7 +65,7 @@ class ImageLoader {
             if let httpResponse = response as? HTTPURLResponse,
                let data = data,
                self.isValid(httpResponse),
-               let _ = UIImage(data: data) {
+               self.isValid(data) {
                 self.cache.storeCachedResponse(CachedURLResponse(response: response!,
                                                                  data: data),
                                                for: URLRequest(url: url))
@@ -74,6 +74,11 @@ class ImageLoader {
             }
             completion(.failure(ImageLoaderError.invalidResponse))
         }.resume()
+    }
+    
+    private func isValid(_ data: Data) -> Bool {
+        guard let _ = UIImage(data: data) else { return false}
+        return true
     }
     
     private func isValid(_ response: HTTPURLResponse) -> Bool {
