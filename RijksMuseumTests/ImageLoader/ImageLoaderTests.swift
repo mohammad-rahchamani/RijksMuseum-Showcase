@@ -143,8 +143,4 @@ class ImageLoaderTests: XCTestCase {
         wait(for: [exp], timeout: 1)
     }
     
-    func anyUIImage() -> UIImage {
-        UIImage(systemName: "trash")!
-    }
-    
 }
