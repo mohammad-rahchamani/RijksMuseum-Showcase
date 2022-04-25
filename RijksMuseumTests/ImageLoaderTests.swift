@@ -48,18 +48,20 @@ class ImageLoader {
     
     func load(from url: URL, completion: @escaping (Result<Data, Error>) -> Void) {
         let task = session.dataTask(with: url)
-        self.cache.getCachedResponse(for: task) { [unowned self] response in
+        self.cache.getCachedResponse(for: task) { [weak self] response in
+            guard let self = self else { return }
             if let response = response {
                 completion(.success(response.data))
                 return
             }
-            loadFrom(url, completion: completion)
+            self.loadFrom(url, completion: completion)
         }
     }
     
     private func loadFrom(_ url: URL,
                           completion: @escaping (Result<Data, Error>) -> Void) {
-        session.dataTask(with: url) { [unowned self] (data, response, error) in
+        session.dataTask(with: url) { [weak self] (data, response, error) in
+            guard let self = self else { return }
             if let httpResponse = response as? HTTPURLResponse,
                let data = data,
                self.isValid(httpResponse),
