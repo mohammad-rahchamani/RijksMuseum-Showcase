@@ -8,13 +8,27 @@
 import SwiftUI
 
 struct ItemDetailsView: View {
+    
+    let item: FeedItem
+    
+    init(item: FeedItem) {
+        self.item = item
+    }
+    
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        VStack {
+            Spacer()
+            Text(item.title)
+            Spacer()
+            Text(item.longTitle)
+            Spacer()
+        }
+        .padding()
     }
 }
 
 struct ItemDetailsView_Previews: PreviewProvider {
     static var previews: some View {
-        ItemDetailsView()
+        ItemDetailsView(item: FeedItem(id: "", objectNumber: "", title: "", longTitle: "", webImage: FeedImage(guid: "", url: ""), headerImage: FeedImage(guid: "", url: "")))
     }
 }
